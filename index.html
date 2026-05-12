@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Files</title>
+</head>
+<body>
+  <h1>Available Files</h1>
+  <div id="file-list"></div>
+
+  <script>
+    const owner = "YOUR_USERNAME";
+    const repo = "YOUR_REPO";
+    const path = "files";
+
+    const apiUrl =
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+
+    fetch(apiUrl)
+      .then(res => res.json())
+      .then(files => {
+        const container = document.getElementById("file-list");
+
+        files.forEach(file => {
+          const button = document.createElement("button");
+          button.textContent = file.name;
+
+          button.onclick = () => {
+            const fileUrl =
+              `https://${owner}.github.io/${repo}/${path}/${file.name}`;
+
+            navigator.clipboard.writeText(fileUrl);
+
+            alert("Copied URL:\n" + fileUrl);
+          };
+
+          container.appendChild(button);
+          container.appendChild(document.createElement("br"));
+        });
+      });
+  </script>
+</body>
+</html>
