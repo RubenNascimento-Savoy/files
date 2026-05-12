@@ -2,42 +2,95 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Files</title>
+  <title>File Browser</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .file-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .file-name {
+      min-width: 250px;
+    }
+
+    button {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h1>Available Files</h1>
-  <div id="file-list"></div>
 
-  <script>
-    const owner = "RubenNascimento-Savoy";
-    const repo = "files";
-    const path = "";
+<h1>Files</h1>
 
-    const apiUrl =
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+<div id="file-list"></div>
 
-    fetch(apiUrl)
-      .then(res => res.json())
-      .then(files => {
-        const container = document.getElementById("file-list");
+<script>
+const owner = "RubenNascimento-Savoy";
+const repo = "files";
 
-        files.forEach(file => {
-          const button = document.createElement("button");
-          button.textContent = file.name;
+const container = document.getElementById("file-list");
 
-          button.onclick = () => {
-            const fileUrl =
-              `https://${owner}.github.io/${repo}/${path}/${file.name}`;
+async function getFiles(path = "") {
+  const apiUrl =
+    `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
-            navigator.clipboard.writeText(fileUrl);
+  const response = await fetch(apiUrl);
+  const items = await response.json();
 
-            alert("Copied URL:\n" + fileUrl);
-          };
+  for (const item of items) {
 
-          container.appendChild(button);
-          container.appendChild(document.createElement("br"));
-        });
-      });
-  </script>
+    // If folder → recurse into it
+    if (item.type === "dir") {
+      await getFiles(item.path);
+    }
+
+    // If file → create UI row
+    if (item.type === "file") {
+
+      const fileUrl =
+        `https://${owner}.github.io/${repo}/${item.path}`;
+
+      const row = document.createElement("div");
+      row.className = "file-row";
+
+      // filename text
+      const name = document.createElement("span");
+      name.className = "file-name";
+      name.textContent = item.path;
+
+      // copy button
+      const button = document.createElement("button");
+      button.textContent = "Copy";
+
+      button.onclick = async () => {
+        await navigator.clipboard.writeText(fileUrl);
+
+        button.textContent = "Copied!";
+
+        setTimeout(() => {
+          button.textContent = "Copy";
+        }, 1000);
+      };
+
+      row.appendChild(name);
+      row.appendChild(button);
+
+      container.appendChild(row);
+    }
+  }
+}
+
+getFiles();
+</script>
+
 </body>
 </html>
