@@ -56,36 +56,39 @@ async function getFiles(path = "") {
     // If file → create UI row
     if (item.type === "file") {
 
-      const fileUrl =
-        `https://${owner}.github.io/${repo}/${item.path}`;
+  // Skip index.html
+  if (item.name === "index.html") {
+    continue;
+  }
 
-      const row = document.createElement("div");
-      row.className = "file-row";
+  const fileUrl =
+    `https://${owner}.github.io/${repo}/${item.path}`;
 
-      // filename text
-      const name = document.createElement("span");
-      name.className = "file-name";
-      name.textContent = item.path;
+  const row = document.createElement("div");
+  row.className = "file-row";
 
-      // copy button
-      const button = document.createElement("button");
+  const name = document.createElement("span");
+  name.className = "file-name";
+  name.textContent = item.path;
+
+  const button = document.createElement("button");
+  button.textContent = "Copy";
+
+  button.onclick = async () => {
+    await navigator.clipboard.writeText(fileUrl);
+
+    button.textContent = "Copied!";
+
+    setTimeout(() => {
       button.textContent = "Copy";
+    }, 1000);
+  };
 
-      button.onclick = async () => {
-        await navigator.clipboard.writeText(fileUrl);
+  row.appendChild(name);
+  row.appendChild(button);
 
-        button.textContent = "Copied!";
-
-        setTimeout(() => {
-          button.textContent = "Copy";
-        }, 1000);
-      };
-
-      row.appendChild(name);
-      row.appendChild(button);
-
-      container.appendChild(row);
-    }
+  container.appendChild(row);
+}
   }
 }
 
